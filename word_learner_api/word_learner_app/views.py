@@ -1,6 +1,6 @@
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from nltk.corpus import wordnet
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Word
 
 @api_view(['POST'])
@@ -15,10 +15,12 @@ def save_word(request):
             synsets = wordnet.synsets(word_content)
             meanings = []
             synonyms = []
-            
+            examples = []
+
             for synset in synsets[:3]:
                 meanings.append(synset.definition())
                 synonyms.extend([lemma.name() for lemma in synset.lemmas()][:3])
+                examples.extend(synset.examples()[:3])
 
             word_obj = Word.objects.create(
                 content=word_content,
@@ -29,6 +31,9 @@ def save_word(request):
                 meaning_1=meanings[0] if meanings else None,
                 meaning_2=meanings[1] if len(meanings) > 1 else None,
                 meaning_3=meanings[2] if len(meanings) > 2 else None,
+                phrase_1=examples[0] if examples else None,
+                phrase_2=examples[1] if len(examples) > 1 else None,
+                phrase_3=examples[2] if len(examples) > 2 else None,
             )
 
             response_data = {
@@ -37,12 +42,8 @@ def save_word(request):
                 'link': link,
                 'meanings': meanings,
                 'synonyms': synonyms,
+                'examples': examples,
             }
             return Response(response_data)
         else:
             return Response({"error": "Não é uma palavra válida: '{}'".format(word_content)})
-
-@api_view(['GET'])
-def hello_world(request):
-    return Response({"message": "Hello, world!"})
-
