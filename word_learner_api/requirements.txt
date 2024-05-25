@@ -4,3 +4,5 @@ djangorestframework==3.12.4
 requests==2.26.0
 beautifulsoup4==4.10.0
 langdetect==1.0.9
+djangorestframework==3.12.4
+djangorestframework-simplejwt==4.7.2
