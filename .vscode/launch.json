@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "program": "/Users/luiz.setragni/Projects/person/project_word_learner_api/word_learner_api/manage.py",
+            "args": [
+                "runserver",
+                "--noreload"  // Este argumento é importante para depuração
+            ],
+            "django": true,
+            "justMyCode": true,
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "word_learner_api.settings"  // Substitua pelo seu módulo de configurações
+            }
+        }
+    ]
+}

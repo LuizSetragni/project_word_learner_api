@@ -5,7 +5,7 @@ from nltk.corpus import wordnet
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-def save_word(word_content, link=None):
+def save_word(word_content, link=None, user=None):
     if word_content.isalpha():
         synsets = wordnet.synsets(word_content)
         meanings = []
@@ -21,6 +21,7 @@ def save_word(word_content, link=None):
             word_obj = Word.objects.create(
                 content=word_content,
                 link=link,
+                user=user,
                 synonym_1=synonyms[0] if synonyms else None,
                 synonym_2=synonyms[1] if len(synonyms) > 1 else None,
                 synonym_3=synonyms[2] if len(synonyms) > 2 else None,
