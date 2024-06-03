@@ -93,16 +93,13 @@ def get_word_detail_by_id(request, word_id):
 def get_links_by_user_id(request, user_id):
     User = get_user_model()
     user = get_object_or_404(User, id=user_id)
-    
     words = Word.objects.filter(user=user).values_list('link', flat=True)
-    
     link_counts = Counter(link for link in words if link)
-    
     sorted_links = sorted(link_counts.items(), key=lambda x: x[1], reverse=True)
     
     response = [{'link': link, 'count': count} for link, count in sorted_links]
     
-    return JsonResponse({'links': response})
+    return JsonResponse(response, safe=False)
 
 
 @api_view(['GET'])
@@ -129,7 +126,7 @@ def get_word_count_by_day_last_week(request, user_id):
     total_words = sum(response.values())
     average_words_per_day = total_words / len(days_of_week)
     
-    response['average'] = average_words_per_day
+    response['average'] = int(average_words_per_day)
     
     return JsonResponse(response)
 
