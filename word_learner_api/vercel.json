@@ -1,13 +1,13 @@
 {
     "builds":[{
-        "src": "word_learner_api/word_learner_api/wsgi.py",
+        "src": "project_word_learner_api/word_learner_api/word_learner_api/wsgi.py",
         "use": "@vercel/python",
         "config": { "maxLambdaSize": "15mb", "runtime": "python3.9" }
     }],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "word_learner_api/word_learner_api/wsgi.py"
+            "dest": "project_word_learner_api/word_learner_api/word_learner_api/wsgi.py"
         }
     ]
 }
