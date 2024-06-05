@@ -7,7 +7,7 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "word_learner_api/word_learner_api/wsgi.py"
+            "dest": "project_word_learner_api/word_learner_api/word_learner_api/wsgi.py"
         }
     ]
 }
