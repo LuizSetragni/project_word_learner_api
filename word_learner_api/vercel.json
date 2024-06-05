@@ -9,7 +9,8 @@
             "src": "build_files.sh",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "staticfiles_build"
+                "distDir": "staticfiles_build",
+                "buildCommand": "bash -c 'echo \"Iniciando o processo de build...\" && bash build_files.sh'"
             }
         }
     ],
@@ -20,5 +21,3 @@
         }
     ]
 }
-
-
