@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import json
-from typing import Counter
+from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import Word
@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.db.models.functions import TruncDay
 from django.db.models import Count, Q
@@ -73,8 +73,9 @@ def get_words_content_by_user_id(request, user_id):
 def get_word_detail_by_id(request, word_id):
     word = get_object_or_404(Word, id=word_id)
     
-    # Atualize a coluna 'read' para True
+
     word.read = True
+    word.created_at = timezone.now()
     word.save()
     
     word_detail = {
@@ -164,23 +165,24 @@ def get_word_count_by_day_last_week(request, user_id):
 
 
 
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def get_words_by_link_and_user_id(request):
     User = get_user_model()
     
     data = json.loads(request.body)
-    user_id = data.get('user_id')
     link = data.get('link')
 
-    if user_id is None or link is None:
-        return JsonResponse({'error': 'user_id and link are required'}, status=400)
+    if link is None:
+        return JsonResponse({'error': 'Link is required'}, status=400)
 
-    user = get_object_or_404(User, id=user_id)
-
-    words = Word.objects.filter(user=user, link=link).values('id', 'content')
+    user = request.user
+    words = Word.objects.filter(user=user, link=link).values('id', 'content', 'read')
 
     return JsonResponse({'words': list(words)})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -189,20 +191,25 @@ def total_words_count(request, month, user_id):
     
     total_count = Word.objects.filter(
         created_at__month=month,
-        user_id=user_id
+        user_id=user_id,
+        read=True  
     ).count()
     
-    return JsonResponse({'total_count': total_count})
+    return HttpResponse(total_count)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def total_words_per_user(request):
     if request.user.is_authenticated:
-        total_words = Word.objects.filter(user=request.user).count()
-        return JsonResponse({'total_words': total_words})
-    else:
-        return JsonResponse({'error': 'Usuário não autenticado'}, status=401)
-    
+        total_words_read = Word.objects.filter(user=request.user, read=True).count()
+        total_words_not_read = Word.objects.filter(user=request.user, read=False).count()
+
+        response_data = {
+            'total_words_read': total_words_read,
+            'total_words_not_read': total_words_not_read
+        }
+        return JsonResponse(response_data)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])    
@@ -221,3 +228,16 @@ def associate_text_with_word(request, word_id):
         return JsonResponse({'message': 'Texto associado com sucesso à palavra'})
 
     return JsonResponse({'error': 'Método de solicitação inválido'}, status=405)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_word_annotation(request, word_id):
+    word = get_object_or_404(Word, id=word_id)
+    annotation = request.data.get('annotation')
+    
+    if annotation:
+        word.annotation = annotation
+        word.save()
+        return Response({'message': 'Annotation updated successfully'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Annotation text is required'}, status=status.HTTP_400_BAD_REQUEST)
